@@ -3,6 +3,7 @@ name = "ui-signal-plotter"
 version = "0.1.0"
 description = "Simple UI to Plot signal from any source"
 authors = ["azrrael.exe <vcamargo.e@gmail.com>"]
+package-mode = false
 license = "MIT"
 readme = "README.md"
 

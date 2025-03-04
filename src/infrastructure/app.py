@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import random
 from typing import List
 
@@ -26,6 +27,11 @@ class DataPoint(BaseModel):
     value: float
 
 
+class TemperatureData(BaseModel):
+    temp_oven: float
+    temp_ambiente: float
+
+
 async def broadcast_value(value: float):
     for connection in active_connections:
         try:
@@ -35,9 +41,7 @@ async def broadcast_value(value: float):
             active_connections.remove(connection)
 
 
-async def read_serial_data(
-    websocket: WebSocket, port="/dev/tty.usbmodemF412FA65971C2", baudrate=115200
-):
+async def read_serial_data(websocket: WebSocket, port="/dev/ACM0", baudrate=115200):
     """Lee datos del puerto serial y los envía a través de WebSocket."""
     try:
         reader, _ = await serial_asyncio.open_serial_connection(
@@ -50,7 +54,7 @@ async def read_serial_data(
                     decoded_data = json.loads(data.decode("utf-8").strip())
                     print(decoded_data)
                     try:
-                        value = float(decoded_data["AnalogSensor"])
+                        value = float(decoded_data["temp_oven"])
                         await broadcast_value(value)
                     except ValueError:
                         await websocket.send_text(json.dumps({"message": decoded_data}))
@@ -100,8 +104,8 @@ async def websocket_endpoint(websocket: WebSocket):
     active_connections.append(websocket)
 
     # Uncomment either random_task or serial_task based on what you want to use
-    random_task = asyncio.create_task(generate_random_data(websocket))
-    # serial_task = asyncio.create_task(read_serial_data(websocket))
+    # random_task = asyncio.create_task(generate_random_data(websocket))
+    # serial_task = asyncio.create_task(read_serial_data(websocket=websocket))
 
     try:
         while True:
@@ -116,7 +120,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except:
         if websocket in active_connections:
             active_connections.remove(websocket)
-        random_task.cancel()
+        # random_task.cancel()
         # serial_task.cancel()
         await websocket.close()
 

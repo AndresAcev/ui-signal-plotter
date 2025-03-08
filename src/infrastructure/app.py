@@ -41,7 +41,9 @@ async def broadcast_value(value: float):
             active_connections.remove(connection)
 
 
-async def read_serial_data(websocket: WebSocket, port="/dev/ACM0", baudrate=115200):
+## async def read_serial_data(websocket: WebSocket, port="/dev/ACM0", baudrate=115200):
+async def read_serial_data(websocket: WebSocket, port="/dev/COM3", baudrate=115200):
+
     """Lee datos del puerto serial y los envía a través de WebSocket."""
     try:
         reader, _ = await serial_asyncio.open_serial_connection(
@@ -104,7 +106,7 @@ async def websocket_endpoint(websocket: WebSocket):
     active_connections.append(websocket)
 
     # Uncomment either random_task or serial_task based on what you want to use
-    # random_task = asyncio.create_task(generate_random_data(websocket))
+    random_task = asyncio.create_task(generate_random_data(websocket))
     # serial_task = asyncio.create_task(read_serial_data(websocket=websocket))
 
     try:
@@ -120,10 +122,12 @@ async def websocket_endpoint(websocket: WebSocket):
     except:
         if websocket in active_connections:
             active_connections.remove(websocket)
-        # random_task.cancel()
+        random_task.cancel()
         # serial_task.cancel()
         await websocket.close()
 
 
 if __name__ == "__main__":
+    #import uvicorn
     app.run(host="0.0.0.0", port=8000, debug=True, reload=True)
+

@@ -104,7 +104,7 @@ async def websocket_endpoint(websocket: WebSocket):
     active_connections.append(websocket)
 
     # Uncomment either random_task or serial_task based on what you want to use
-    # random_task = asyncio.create_task(generate_random_data(websocket))
+    random_task = asyncio.create_task(generate_random_data(websocket))
     # serial_task = asyncio.create_task(read_serial_data(websocket=websocket))
 
     try:
